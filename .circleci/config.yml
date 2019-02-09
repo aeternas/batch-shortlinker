@@ -1,0 +1,73 @@
+aliases:
+  - &containerize_push
+    name: Containerize and Push
+    command: |
+      docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD && \
+      docker build --build-arg SW_HOSTNAME=$HOSTNAME -t aeternas/batch-shortlinker:$CIRCLE_BRANCH . && \
+      docker push aeternas/batch-shortlinker:$CIRCLE_BRANCH
+
+  - &restore_cache
+    keys:
+      - v1-dependencies-{{ checksum "project.clj" }}
+      - v1-dependencies-
+  - &save_cache
+    paths:
+      - ~/.m2
+    key: v1-dependencies-{{ checksum "project.clj" }}
+  - &run
+    name: Warm Cache
+    command: |
+      java -jar batch-shortlinker-0.1.0-SNAPSHOT-standalone.jar
+
+version: 2
+jobs:
+  build:
+    filters:
+      branches:
+        only:
+          - master
+          - development
+    docker:
+      - image: circleci/clojure:lein-2.7.1
+    working_directory: ~/repo
+
+    environment:
+      LEIN_ROOT: "true"
+      JVM_OPTS: -Xmx3200m
+    
+    steps:
+      - checkout
+      - restore_cache: *restore_cache
+
+      - run: lein deps
+
+      - save_cache: *save_cache
+      - run: lein test
+      - run: lein uberjar 
+      - run: if [ $CIRCLE_BRANCH == "master" ]; then echo 'export HOSTNAME="$PROD_HOSTNAME"' >> $BASH_ENV; else echo 'export HOSTNAME="$DEV_HOSTNAME"' >> $BASH_ENV; fi
+      - store_artifacts:
+          path: target/uberjar/batch-shortlinker-0.1.0-SNAPSHOT-standalone.jar
+      - setup_remote_docker:
+          docker_layer_caching: true
+      - deploy: *containerize_push
+  run:
+    filters:
+      branches:
+        only:
+          - master
+          - development
+    docker:
+      - image: aeternas/batch-shortlinker:$CIRCLE_BRANCH
+    working_directory: /home/circleci/repo
+    steps:
+      - deploy: *run
+workflows:
+  version: 2
+  build-run:
+    jobs:
+      - build:
+          filters:
+            branches:
+              only:
+                - master
+                - development
