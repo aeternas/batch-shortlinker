@@ -1,6 +1,6 @@
 (ns batch-shortlinker.dto.create-request)
 
-(defrecord CreateRequest [data])
+(defrecord CreateRequest [headers data])
 
-(defn make-createRequest ([data]
-                          (->CreateRequest data)))
+(defn make-createRequest ([headers data]
+                          (->CreateRequest headers data)))
