@@ -5,7 +5,6 @@ aliases:
       docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD && \
       docker build --build-arg SW_HOSTNAME=$HOSTNAME -t aeternas/batch-shortlinker:$CIRCLE_BRANCH . && \
       docker push aeternas/batch-shortlinker:$CIRCLE_BRANCH
-
   - &restore_cache
     keys:
       - v1-dependencies-{{ checksum "project.clj" }}
@@ -38,9 +37,7 @@ jobs:
     steps:
       - checkout
       - restore_cache: *restore_cache
-
       - run: lein deps
-
       - save_cache: *save_cache
       - run: lein test
       - run: lein uberjar 
