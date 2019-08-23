@@ -18,14 +18,9 @@ aliases:
     command: |
       java -jar batch-shortlinker-0.1.0-SNAPSHOT-standalone.jar
 
-version: 2
+version: 2.1
 jobs:
   build:
-    filters:
-      branches:
-        only:
-          - master
-          - development
     docker:
       - image: circleci/clojure:lein-2.7.1
     working_directory: ~/repo
@@ -48,18 +43,13 @@ jobs:
           docker_layer_caching: true
       - deploy: *containerize_push
   run:
-    filters:
-      branches:
-        only:
-          - master
-          - development
     docker:
       - image: aeternas/batch-shortlinker:$CIRCLE_BRANCH
     working_directory: /home/circleci/repo
     steps:
       - deploy: *run
 workflows:
-  version: 2
+  version: 2.1
   build-run:
     jobs:
       - build:
