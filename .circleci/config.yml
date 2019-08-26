@@ -15,7 +15,12 @@ aliases:
     key: v1-dependencies-{{ checksum "project.clj" }}
   - &export_env
     name: Export envs
-    command: if [ $CIRCLE_BRANCH == "master" ]; then echo 'export HOSTNAME="$PROD_HOSTNAME"' >> $BASH_ENV; else echo 'export HOSTNAME="$DEV_HOSTNAME"' >> $BASH_ENV; fi
+    command: |
+      if [ $CIRCLE_BRANCH == "master" ]; then 
+        echo 'export HOSTNAME="$PROD_HOSTNAME"' >> $BASH_ENV
+      else 
+        echo 'export HOSTNAME="$DEV_HOSTNAME"' >> $BASH_ENV
+      fi
   - &run
     name: Warm Cache
     command: |
@@ -36,6 +41,7 @@ jobs:
       - save_cache: *save_cache
       - run: lein test
       - run: lein uberjar 
+      - run: *export_env
       - store_artifacts:
           path: target/uberjar/batch-shortlinker-0.1.0-SNAPSHOT-standalone.jar
       - setup_remote_docker:
