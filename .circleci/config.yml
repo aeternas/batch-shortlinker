@@ -15,6 +15,10 @@ aliases:
       docker login -u $DOCKER_USERNAME --password-stdin < docker_passwd && rm docker_passwd && \
       docker build --build-arg SW_HOSTNAME=$HOSTNAME -t aeternas/batch-shortlinker:$CIRCLE_BRANCH . && \
       docker push aeternas/batch-shortlinker:$CIRCLE_BRANCH
+      if [[ $CIRCLE_BRANCH == "master" ]]; then \
+        docker tag aeternas/batch-shortlinker:master aeternas/batch-shortlinker:latest && \
+        docker push aeternas/batch-shortlinker:latest
+      fi
   - &environment
     LEIN_ROOT: "true"
     JVM_OPTS: -Xmx3200m
