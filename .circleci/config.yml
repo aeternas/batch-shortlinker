@@ -7,7 +7,7 @@ aliases:
       git checkout $CIRCLE_SHA1
   - &setup_remote_docker
     setup_remote_docker:
-      docker_layer_caching: true
+      docker_layer_caching: false
   - &containerize_push
     name: Containerize and Push
     command: |
