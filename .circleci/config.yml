@@ -8,6 +8,9 @@ aliases:
   - &setup_remote_docker
     setup_remote_docker:
       docker_layer_caching: false
+  - &store_artifacts
+    store_artifacts:
+      path: target/uberjar/batch-shortlinker-0.1.0-SNAPSHOT-standalone.jar
   - &containerize_push
     name: Containerize and Push
     command: |
@@ -57,8 +60,7 @@ jobs:
       - run: lein test
       - run: lein uberjar 
       - run: *export_env
-      - store_artifacts:
-          path: target/uberjar/batch-shortlinker-0.1.0-SNAPSHOT-standalone.jar
+      - *store_artifacts
       - *setup_remote_docker
       - deploy: *containerize_push
   run:
